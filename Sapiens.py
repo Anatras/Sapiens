@@ -21,7 +21,7 @@ gruppi = [-1001100753533]
 
 def pubblicità():
     membri = app.get_chat_members_count("sapiens3")
-    messaggio = "#cercosponsor\n"+"🧠 🧠 🧠 🧠🧠🧠\n"+"🧠 @sapiens3\n"+f"🧠 👥 {membri}\n"+"🧠 👀 4000 / 24h\n"+"🧠 🧠 🧠 🧠🧠 🧠\n"+ "⛔️Clickbait\n"+"\n\n"+"#vendosponsor\n"+"🕒 15.01 - 20.01\n"+"💵 7€\n"+"🕒 21.00 - 10.00\n"+"💵 5€\n"+"\n"+"❗️ @SponsorBot ❗️\n"+"\n"+"ℹ️ @EmeraldBot @PsykhedelosBot"
+    messaggio = "#cercosponsor\n"+"🧠 🧠 🧠 🧠🧠🧠\n"+"🧠 @sapiens3\n"+f"🧠 👥 {membri}\n"+"🧠 👀 4000 / 24h\n"+"🧠 🧠 🧠 🧠🧠 🧠\n"+ "⛔️Clickbait\n"+"\n\n"+"#vendosponsor\n"+"🕒 15.01 - 20.01\n"+"💵 7€\n"+"🕒 21.00 - 10.00\n"+"💵 5€\n"+"\n"+"❗️ @SponsorBot ❗️\n"+"\n"+"ℹ️ @SapiensUserBot"
     for gruppo in gruppi:
         try:
             app.send_message(gruppo,messaggio)
