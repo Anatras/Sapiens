@@ -65,13 +65,25 @@ def guida(client,message):
         )
     app.send_message(message.chat.id,messaggio,disable_web_page_preview = True)
 
+@app.on_message(Filters.command(["link"]), group = 1)
+def link(client,message):
+    message.delete()
+    messaggio = (
+        "Link delle chat per i traduttori:\n\n"
+        "Sapiens ENG, da cui prendere il materiale da tradurre:\n"
+        "t.me/joinchat/AItIX0g7FrpzrfncYF06vQ \n\n"
+        "Sapiens Beta, in cui postare il materiale una volta tradotto:\n"
+        "t.me/joinchat/AAAAAEZl0oC2n8wrha268A"
+        )
+    app.send_message(message.chat.id,messaggio,disable_web_page_preview = True)
+    
 @app.on_message(Filters.command(["eng"]), group = 1)
 def eng(client,message):
     message.delete()
     app.send_message(message.chat.id,"TIL That women are better at discerning shades of colours, while men are better at tracking fast-moving objects and discerning detail from a distance. These are evolutionary details linked to a hunter-gatherer past.\nhttps://news.nationalgeographic.com/news/2012/09/120907-men-women-see-differently-science-health-vision-sex/", disable_web_page_preview = True)
 
-@app.on_message(Filters.command(["it"]), group = 1)
-def it(_,message):
+@app.on_message(Filters.command(["ita"]), group = 1)
+def ita(_,message):
     message.delete()
     caption = (
         "#SapeviChe\n"
