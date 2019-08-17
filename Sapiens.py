@@ -1,8 +1,11 @@
 from pyrogram import Client, Filters, Emoji
-from pyrogram.errors import RPCError
+from pyrogram.errors import RPCError, FloodWait, MessageEditTimeExpired
 import threading
 import schedule
 import time
+import random
+import re
+import json
 
 app = Client( 
 "Userbot"
@@ -15,7 +18,22 @@ def startJob():
         schedule.run_pending()
         time.sleep(1)
 
-gruppi = [-1001100753533]
+gruppi = [-1001100753533,-1001179969920]
+
+def messaggioSapiens():
+    messaggio = app.iter_history(-1001483265011)
+    messaggio = random.choice(list(messaggio))
+    messaggio.delete()
+    messaggio.forward("sapiens3",as_copy = True)
+
+f = open("programma.txt")
+programma = f.read()
+if programma == "True":
+    app.send_message("Anatras02","Ho avviato il bot, e la programmazione è attiva!")
+    schedule.every().day.at("15:00").do(messaggioSapiens).tag("sapiensTag")
+    schedule.every().day.at("20:00").do(messaggioSapiens).tag("sapiensTag")
+f.close()
+
 
 def pubblicità():
     membri = app.get_chat_members_count("sapiens3")
@@ -33,6 +51,9 @@ t1.start()
 schedule.every().day.at("10:00").do(pubblicità)
 schedule.every().day.at("15:00").do(pubblicità)
 schedule.every().day.at("20:00").do(pubblicità)
+
+with open('giocatori.json', 'r') as fp:
+    giocatori = json.load(fp)
 
 @app.on_message(Filters.private & ~Filters.me)
 def first_msg(client, message):
@@ -70,7 +91,7 @@ def eng(client,message):
     message.delete()
     app.send_message(message.chat.id,"TIL That women are better at discerning shades of colours, while men are better at tracking fast-moving objects and discerning detail from a distance. These are evolutionary details linked to a hunter-gatherer past.\nhttps://news.nationalgeographic.com/news/2012/09/120907-men-women-see-differently-science-health-vision-sex/", disable_web_page_preview = True)
 
-@app.on_message(Filters.command(["it"]), group = 1)
+@app.on_message(Filters.command(["ita"]), group = 1)
 def it(_,message):
     message.delete()
     caption = (
@@ -85,6 +106,107 @@ def it(_,message):
         "it.jpg",
         caption = caption
         )
+
+@app.on_message(Filters.command(["link"]), group = 1)
+def link(client,message):
+    message.delete()
+    messaggio = (
+        "Link delle chat per i traduttori:\n\n"
+        "Sapiens ENG, da cui prendere il materiale da tradurre:\n"
+        "t.me/joinchat/AItIX0g7FrpzrfncYF06vQ \n\n"
+        "Sapiens Beta, in cui postare il materiale una volta tradotto:\n"
+        "t.me/joinchat/AAAAAEZl0oC2n8wrha268A"
+        )
+    app.send_message(message.chat.id,messaggio,disable_web_page_preview = True)
+
+@app.on_message(Filters.command(["programma"]) & Filters.user(["Anatras02","Sapiens3UserBot"]), group = 1)
+def programmaFunc(_,message):
+    global programma
+    try:
+        flag = message.command[1]
+    except IndexError:
+        flag = None
+
+    if flag == None:
+        if programma == "True":
+            message.reply("La programmazione è attiva\n\nPer attivarla usa il comando `/programma disattiva`")
+            return
+        if programma == "False":
+            message.reply("La programmazione è disabilitata\n\nPer disattivarla usa il comando `/programma attiva`")
+            return
+
+    if flag.lower() == "attiva":
+        programma = "True"
+        message.reply("Programmazione attivata!")
+        schedule.every().day.at("15:00").do(messaggioSapiens).tag("sapiensTag")
+        schedule.every().day.at("20:00").do(messaggioSapiens).tag("sapiensTag")
+    elif flag.lower() == "disattiva":
+        programma = "False"
+        schedule.clear('sapiensTag')
+        message.reply("Programmazione disattivata!")
+    else:
+        message.reply("Tag validi: `attiva`,`disattiva`,`vuoto`")
+
+    f = open("programma.txt", "w")
+    f.write(str(programma))
+    f.close()
+
+@app.on_message(Filters.command(["fixAll"]) & Filters.user(["Anatras02","Sapiens3UserBot"]), group = 1)
+def fixAll(_,message):
+    rx = r'([^ ]+) - (http.+)'
+    messaggi = app.iter_history(-1001169693822)
+
+    for messaggio in messaggi:
+        testo = ""
+        regex = False
+        try:
+            messaggioText = messaggio.caption.markdown.split("\n")
+        except AttributeError:
+            pass
+        for line in messaggioText:
+            mo = re.match(rx,line)
+            if mo:
+                index = messaggioText.index(line)
+                resto = "\n".join(messaggioText[:index])
+                fine = "\n".join(messaggioText[index+1:])
+                testo = resto + f"\n[📚 {mo.group(1)}]({mo.group(2)})\n" + fine
+                regex = True
+
+        if regex == True:
+            time.sleep(5)
+            try:
+                messaggioEditato = messaggio.edit_caption(testo)
+                messaggioEditato.forward(-1001181078144, as_copy = True)
+                messaggioEditato.delete()
+            except FloodWait as e:
+                print("Flood Wait:",e.x)
+                time.sleep(e.x)
+                messaggioEditato = messaggio.edit_caption(testo)
+                messaggioEditato.forward(-1001181078144, as_copy = True)
+                messaggioEditato.delete()
+    message.reply("Finito!")
+
+@app.on_message(Filters.command(["id"]))
+def id(_,message):
+    message.reply(message.chat.id)
+
+def SaveJson(fileName,dictName):
+    with open(fileName, 'w') as fp:
+        json.dump(dictName, fp,sort_keys=True, indent=4)
+ 
+@app.on_message(Filters.command(["add"]) & Filters.user(["Anatras02","EmeraldBot","Sapiens3UserBot"]), group = 1)
+def add(_,message):
+    utente = str(message.from_user.id)
+
+    if utente not in giocatori:
+        giocatori[utente] = dict()
+        giocatori[utente]["andamento"] = 0 
+
+    giocatori[utente]["andamento"] += 1
+
+    message.reply(f"**{message.from_user.first_name}** dall'inizio ha fatto **{giocatori[utente]['andamento']}** traduzioni")
+    SaveJson("giocatori.json",giocatori)
+
 
 app.run()
 
