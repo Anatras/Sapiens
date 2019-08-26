@@ -19,6 +19,7 @@ def startJob():
         time.sleep(1)
 
 gruppi = [-1001100753533,-1001179969920]
+liste = [-1001144479124]
 
 def messaggioSapiens():
     messaggio = app.iter_history(-1001483265011)
@@ -51,6 +52,20 @@ t1.start()
 schedule.every().day.at("10:00").do(pubblicità)
 schedule.every().day.at("15:00").do(pubblicità)
 schedule.every().day.at("20:00").do(pubblicità)
+
+def prenotazioneFly():
+    messaggioListaFly = " 🧠CURIOSITÀ E SCIENZA 🧠 - @Sapiens3"
+    for lista in liste:
+        try:
+            app.send_message(listaFly, messaggioListaFly)
+        except RPCError as e:
+            print(e)
+            continue
+
+t1 = threading.Thread(target=startJob)
+t1.start()
+
+schedule.every().saturday.at("23:50").do(prenotazioneFly)
 
 with open('giocatori.json', 'r') as fp:
     giocatori = json.load(fp)
@@ -151,7 +166,7 @@ def programmaFunc(_,message):
     f.write(str(programma))
     f.close()
 
-@app.on_message(Filters.command(["fixAll"]) & Filters.user(["Anatras02","Sapiens3UserBot"]), group = 1)
+@app.on_message(Filters.command(["fixAll"]) & Filters.user(["Anatras02","Sapiens3UserBot","EmeraldBot"]), group = 1)
 def fixAll(_,message):
     rx = r'([^ ]+) - (http.+)'
     messaggi = app.iter_history(-1001169693822)
@@ -194,7 +209,7 @@ def SaveJson(fileName,dictName):
     with open(fileName, 'w') as fp:
         json.dump(dictName, fp,sort_keys=True, indent=4)
  
-@app.on_message(Filters.command(["add"]) & Filters.user(["Anatras02","EmeraldBot","Sapiens3UserBot"]), group = 1)
+@app.on_message(Filters.command(["add"]) & Filters.user(["Anatras02","EmeraldBot","Sapiens3UserBot","ClaireClok"]), group = 1)
 def add(_,message):
     utente = str(message.from_user.id)
 
