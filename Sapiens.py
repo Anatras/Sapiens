@@ -18,13 +18,22 @@ def startJob():
         schedule.run_pending()
         time.sleep(1)
 
+def aggiornaGiorno():
+    giocatori[utente]["giorni"] += 1
+    SaveJson("traduzioni.json",risorsePers)
+
 gruppi = [-1001100753533,-1001179969920]
+liste = [-1001144479124]
 
 def messaggioSapiens():
     messaggio = app.iter_history(-1001483265011)
     messaggio = random.choice(list(messaggio))
     messaggio.delete()
     messaggio.forward("sapiens3",as_copy = True)
+
+def conteggioSettimanale():
+    for utente in giocatori:
+        giocatori[utente]["conteggioSettimanale"] = 0
 
 f = open("programma.txt")
 programma = f.read()
@@ -33,6 +42,8 @@ if programma == "True":
     schedule.every().day.at("15:00").do(messaggioSapiens).tag("sapiensTag")
     schedule.every().day.at("20:00").do(messaggioSapiens).tag("sapiensTag")
 f.close()
+
+schedule.every().monday.do(conteggioSettimanale)
 
 
 def pubblicità():
@@ -44,10 +55,21 @@ def pubblicità():
         except RPCError as e:
             print(e)
             continue
+def prenotazioneFly():
+    messaggioListaFly = " 🧠CURIOSITÀ E SCIENZA 🧠 - @Sapiens3"
+    for lista in liste:
+        try:
+            app.send_message(listaFly, messaggioListaFly)
+        except RPCError as e:
+            print(e)
+            continue
+
+schedule.every().saturday.at("23:50").do(prenotazioneFly)
 
 t1 = threading.Thread(target=startJob)
 t1.start()
 
+schedule.every().saturday.at("23:50").do(prenotazioneFly)
 schedule.every().day.at("10:00").do(pubblicità)
 schedule.every().day.at("15:00").do(pubblicità)
 schedule.every().day.at("20:00").do(pubblicità)
@@ -107,7 +129,7 @@ def it(_,message):
         caption = caption
         )
 
-@app.on_message(Filters.command(["link"]), group = 1)
+@app.on_message(Filters.command(["link"]) & Filters.me, group = 1)
 def link(client,message):
     message.delete()
     messaggio = (
@@ -151,7 +173,7 @@ def programmaFunc(_,message):
     f.write(str(programma))
     f.close()
 
-@app.on_message(Filters.command(["fixAll"]) & Filters.user(["Anatras02","Sapiens3UserBot"]), group = 1)
+@app.on_message(Filters.command(["fixAll"]) & Filters.user(["Anatras02","Sapiens3UserBot","EmeraldBot"]), group = 1)
 def fixAll(_,message):
     rx = r'([^ ]+) - (http.+)'
     messaggi = app.iter_history(-1001169693822)
@@ -194,19 +216,41 @@ def SaveJson(fileName,dictName):
     with open(fileName, 'w') as fp:
         json.dump(dictName, fp,sort_keys=True, indent=4)
  
-@app.on_message(Filters.command(["add"]) & Filters.user(["Anatras02","EmeraldBot","Sapiens3UserBot"]), group = 1)
+@app.on_message(Filters.command(["add"]) & (Filters.user(["Anatras02","EmeraldBot","Sapiens3UserBot","ClaireClok"]) | Filters.channel), group = 1)
 def add(_,message):
-    utente = str(message.from_user.id)
+    rx = r'/add (\d+)?\s?@?(\w+)'
+    mo = re.match(rx,message.text)
 
-    if utente not in giocatori:
-        giocatori[utente] = dict()
-        giocatori[utente]["andamento"] = 0 
+    if mo:
+        utente = mo.group(2)
+        if utente not in giocatori:
+            giocatori[utente] = dict()
+            giocatori[utente]["andamento"] = 0 
+            giocatori[utente]["giorni"] = 0 
+            giocatori[utente]["andamentoSettimanale"] = 0 
+            schedule.every().monday.do(conteggioSettimanale)
 
-    giocatori[utente]["andamento"] += 1
+        if mo.group(1) == None:
+            giocatori[utente]["andamento"] += 1
+            giocatori[utente]["andamentoSettimanale"] += 1
+        else:
+            giocatori[utente]["andamento"] += int(mo.group(1))
+            giocatori[utente]["andamentoSettimanale"] += int(mo.group(1))
 
-    message.reply(f"**{message.from_user.first_name}** dall'inizio ha fatto **{giocatori[utente]['andamento']}** traduzioni")
-    SaveJson("giocatori.json",giocatori)
+        message.reply(f"**{mo.group(2)}** dall'inizio ha fatto **{giocatori[utente]['andamento']}** traduzioni\nQuesta settimana ha fatto **{giocatori[utente]['andamentoSettimanale']}** traduzioni")
+        SaveJson("giocatori.json",giocatori)
+    else:
+        message.reply("Sintassi non valida\n\n`/add (numero) username`\nIl numero è facoltativo")
 
+@app.on_message(Filters.command(["counter"]) & (Filters.user(["Anatras02","EmeraldBot","Sapiens3UserBot"]) | Filters.channel), group = 1)
+def add(_,message):
+    andamentoSettimanale = "**Andamento Settimanale**\n"
+    andamentoTotale = "**Anamento Totale**\n"
+    for utente in giocatori:
+        andamentoSettimanale += f'{utente} - {giocatori[utente]["andamentoSettimanale"]}\n'
+        andamentoTotale += f'{utente} - {giocatori[utente]["andamento"]}\n'
+
+    app.send_message(message.chat.id,andamentoSettimanale+"\n"+andamentoTotale)
 
 app.run()
 
