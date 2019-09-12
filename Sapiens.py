@@ -28,8 +28,9 @@ liste = [-1001144479124]
 def messaggioSapiens():
     messaggio = app.iter_history(-1001483265011)
     messaggio = random.choice(list(messaggio))
-    messaggio.delete()
     messaggio.forward("sapiens3",as_copy = True)
+    messaggio.delete()
+    
 
 def conteggioSettimanale():
     for utente in giocatori:
@@ -38,7 +39,7 @@ def conteggioSettimanale():
 f = open("programma.txt")
 programma = f.read()
 if programma == "True":
-    app.send_message("Anatras02","Ho avviato il bot, e la programmazione è attiva!")
+    print("Programmazione Attiva")
     schedule.every().day.at("15:00").do(messaggioSapiens).tag("sapiensTag")
     schedule.every().day.at("20:00").do(messaggioSapiens).tag("sapiensTag")
 f.close()
@@ -59,12 +60,10 @@ def prenotazioneFly():
     messaggioListaFly = " 🧠CURIOSITÀ E SCIENZA 🧠 - @Sapiens3"
     for lista in liste:
         try:
-            app.send_message(listaFly, messaggioListaFly)
+            app.send_message(lista, messaggioListaFly)
         except RPCError as e:
             print(e)
             continue
-
-schedule.every().saturday.at("23:50").do(prenotazioneFly)
 
 t1 = threading.Thread(target=startJob)
 t1.start()
